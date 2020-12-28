@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebRTC</title>
+
+  <style type="text/css">
+    body {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .centered {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .video-position {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #video-chat-container {
+      width: 100%;
+      background-color: black;
+    }
+
+    #local-video {
+      position: absolute;
+      height: 30%;
+      width: 30%;
+      bottom: 0px;
+      left: 0px;
+    }
+
+    #remote-video {
+      height: 100%;
+      width: 100%;
+    }
+
+    #disconnect-button {
+      display: block;
+      float: right;
+    }
+
+    #buttondiv {
+      position: absolute;
+    }
+
+    #testarea {
+      margin-top: 80%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="room-selection-container" class="centered">
+    <h1>WebRTC video conference</h1>
+    <br>
+    MODE<br>
+    <input type="radio" value="1" name="location">only sound<br>
+    <input type="radio" value="2" name="location">only video<br>
+    <input type="radio" value="3" name="location">both<br>
+    <br>
+    <label>Enter the number of the room you want to connect</label>
+    <input id="room-input" type="text" />
+    <br>
+    <button id="connect-button">CONNECT</button>
+    <br><br>
+  </div>
+
+  <div id="video-chat-container" class="video-position" style="display: none">
+    <!-- <video id="local-video" autoplay="autoplay" muted="muted" playsInline="playsInline"></video> -->
+    <video id="local-video" muted="muted" autoplay="autoplay" playsInline="playsInline"></video>
+    <video id="remote-video" autoplay="autoplay" playsInline="playsInline"></video>
+    <div id="buttondiv">
+      <button id="disconnect-button" disabled>wait for connect....</button>
+      <button id="share-screen" disabled>share screen</button>
+    </div>
+  </div>
+  <!-- this is for Flask -->
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script src="{{ url_for('static', filename = './client.js') }}"></script>
+
+</body>
+
+</html>
