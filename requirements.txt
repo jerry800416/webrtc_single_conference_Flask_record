@@ -2,5 +2,5 @@ Flask==1.1.2
 eventlet==0.29.1
 Flask-SocketIO==4.3.2
 pyaudio==0.2.11
-pydub==0.24.1
+# pydub==0.24.1
 moviepy==1.0.3

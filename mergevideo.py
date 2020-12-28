@@ -1,3 +1,4 @@
+# coding=utf-8
 import cv2
 import numpy as np
 # from pydub import AudioSegment
@@ -91,19 +92,19 @@ def webm2Mp4(file,result):
 
 if __name__ == '__main__':
 
-    recordepath = r"E:\\work\\webrtc\\singleWebconference1.0.0\\recorde\\"
-    recorde_list = os.listdir(recordepath)
+    recordpath = r"E:\\work\\webrtc\\singleWebconference1.0.0\\record\\"
+    record_list = os.listdir(recordpath)
 
 
-    for i in recorde_list:
-        inputfilelist = os.listdir(recordepath+i)
+    for i in record_list:
+        inputfilelist = os.listdir(recordpath+i)
         if len(inputfilelist)== 2 and ('merge.mp3' not in inputfilelist):
             print("轉檔 and 合併")
-            file1 = recordepath+i+'\\'+ inputfilelist[0]
-            file2 = recordepath+i+'\\'+ inputfilelist[1]
-            output1 = recordepath+i+'\\0.mp4'
-            output2 = recordepath+i+'\\1.mp4'
-            result = recordepath+i+'\\merge.mp3'
+            file1 = recordpath+i+'\\'+ inputfilelist[0]
+            file2 = recordpath+i+'\\'+ inputfilelist[1]
+            output1 = recordpath+i+'\\0.mp4'
+            output2 = recordpath+i+'\\1.mp4'
+            result = recordpath+i+'\\merge.mp3'
             r1 = webm2Mp4(file1,output1)
             r2 = webm2Mp4(file2,output2)
             if r1 == True and r2 == True :
@@ -113,9 +114,9 @@ if __name__ == '__main__':
                     print(i,"合併失敗")
 
         elif len(inputfilelist)== 4 and ('merge.mp3' not in inputfilelist):
-            output1 = recordepath+i+'\\0.mp4'
-            output2 = recordepath+i+'\\1.mp4'
-            result = recordepath+i+'\\merge.mp3'
+            output1 = recordpath+i+'\\0.mp4'
+            output2 = recordpath+i+'\\1.mp4'
+            result = recordpath+i+'\\merge.mp3'
             if mergeAudio(output1,output2,result) == True :
                 print(i,"合併成功")
             else :
