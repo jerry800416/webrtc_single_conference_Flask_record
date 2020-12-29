@@ -44,11 +44,6 @@
       width: 100%;
     }
 
-    #disconnect-button {
-      display: block;
-      float: right;
-    }
-
     #buttondiv {
       position: absolute;
     }
@@ -80,6 +75,8 @@
     <video id="local-video" muted="muted" autoplay="autoplay" playsInline="playsInline"></video>
     <video id="remote-video" autoplay="autoplay" playsInline="playsInline"></video>
     <div id="buttondiv">
+      <button id="share-screen" value="0" disabled>share screen</button>
+      <button id="hide-localbox" value="0" disabled>hide localbox</button>
       <button id="disconnect-button" disabled>wait for connect....</button>
     </div>
   </div>

@@ -18,56 +18,56 @@ def index():
 
 
 @socketio.on('join')
-def creatOrJoin(roomId):
+def creatOrJoin(roomid):
     # print('\n'.join(['%s:%s' % item for item in socketio.__dict__.items()]))
     try:
     # catch people num in the room ,if  room not be created ,set num = 0
-        how_many_people = len(socketio.sockio_mw.engineio_app.manager.rooms['/'][str(roomId)])
+        how_many_people = len(socketio.sockio_mw.engineio_app.manager.rooms['/'][str(roomid)])
         
     except :
         how_many_people = 0
     # detec how many people in room ,if no person ,creat room
     if how_many_people == 0 :
-        join_room(roomId)
-        emit('room_created', roomId)
+        join_room(roomid)
+        emit('room_created', roomid)
     # if one person in the room ,join room
     elif how_many_people == 1:
-        join_room(roomId)
-        emit('room_joined', roomId)
+        join_room(roomid)
+        emit('room_joined', roomid)
     # if two people in the room ,return full room info
     else :
-        emit('full_room', roomId)
+        emit('full_room', roomid)
 
 
 @socketio.on('leave')
-def leaveRoom(roomId):
-    leave_room(roomId)
-    emit('close_room',broadcast=True, include_self=False,room=roomId)
-    close_room(roomId)
+def leaveRoom(roomid):
+    leave_room(roomid)
+    emit('close_room',broadcast=True, include_self=False,room=roomid)
+    close_room(roomid)
 
 
 @socketio.on('start_call')
-def startCall(roomId):
-    print('Broadcasting start_call event to peers in room {}'.format(roomId))
-    emit('start_call',broadcast=True, include_self=False,room=roomId)
+def startCall(roomid):
+    print('Broadcasting start_call event to peers in room {}'.format(roomid))
+    emit('start_call',broadcast=True, include_self=False,room=roomid)
 
 
 @socketio.on('webrtc_offer')
 def webrtcOffer(event):
-    print('Broadcasting webrtc_offer event to peers in room {}'.format(event['roomId']))
-    emit('webrtc_offer',event['sdp'],broadcast=True, include_self=False,room=event['roomId'])
+    print('Broadcasting webrtc_offer event to peers in room {}'.format(event['roomid']))
+    emit('webrtc_offer',event['sdp'],broadcast=True, include_self=False,room=event['roomid'])
 
 
 @socketio.on('webrtc_answer')
 def webrtcAnswer(event):
-    print('Broadcasting webrtc_answer event to peers in room {}'.format(event['roomId']))
-    emit('webrtc_answer',event['sdp'],broadcast=True, include_self=False,room=event['roomId'])
+    print('Broadcasting webrtc_answer event to peers in room {}'.format(event['roomid']))
+    emit('webrtc_answer',event['sdp'],broadcast=True, include_self=False,room=event['roomid'])
 
 
 @socketio.on('webrtc_ice_candidate')
 def webrtcIceCandidate(event):
-    print('Broadcasting webrtc_ice_candidate event to peers in room {}'.format(event['roomId']))
-    emit('webrtc_ice_candidate',event,broadcast=True, include_self=False,room=event['roomId'])
+    print('Broadcasting webrtc_ice_candidate event to peers in room {}'.format(event['roomid']))
+    emit('webrtc_ice_candidate',event,broadcast=True, include_self=False,room=event['roomid'])
 
 
 @socketio.on('upload_blob')
@@ -77,7 +77,7 @@ def webrtcuploadblob(event):
     if roomid not in os.listdir('./record/'):
         os.mkdir('./record/{}'.format(roomid))
 
-    with open('./recorde/{}/{}.webm'.format(roomid,clientid),'ab') as f:
+    with open('./record/{}/{}.webm'.format(roomid,clientid),'ab') as f:
             if event[0] != [0]:
                 f.write(event[0])
 

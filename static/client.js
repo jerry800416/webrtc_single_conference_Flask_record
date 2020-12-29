@@ -1,37 +1,17 @@
 // DOM elements.
-const roomSelectionContainer = document.getElementById('room-selection-container')
-const roomInput = document.getElementById('room-input')
-const connectButton = document.getElementById('connect-button')
-const disConnectButton = document.getElementById('disconnect-button')
-const videoChatContainer = document.getElementById('video-chat-container')
-const localVideoComponent = document.getElementById('local-video')
-const remoteVideoComponent = document.getElementById('remote-video')
+const roomselectioncontainer = document.getElementById('room-selection-container')
+const roominput = document.getElementById('room-input')
+const connectbtn = document.getElementById('connect-button')
+const disconnectbtn = document.getElementById('disconnect-button')
+const sharescreen = document.getElementById('share-screen')
+const hidelocalbox = document.getElementById('hide-localbox')
+const videochatcontainer = document.getElementById('video-chat-container')
+const localvideocomponent = document.getElementById('local-video')
+const remotevideocomponent = document.getElementById('remote-video')
 const socket = io()
-
-
-// initial recoder global variable
-var chunks = [];
-var mediaRecorder
-// recorde audio or video
-var blob
-// control webcam and audio
-var mediaConstraints
-// var for mode video or audio 
-var mode = 0
-// var audioURL
-var recoder
-
-
-let localStream
-let remoteStream
-let isRoomCreator
-// Connection between the local device and the remote peer.
-let rtcPeerConnection
-let roomId
-let clientid
-
+const senders = []
 // free public stun servers(by google) ,but no turn server.
-const iceServers = {
+const iceservers = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     // { urls: 'stun:stun1.l.google.com:19302' },
@@ -42,27 +22,66 @@ const iceServers = {
   ],
 }
 
+
+// initial recoder global variable
+var chunks = [];
+var mediarecorder
+// record audio or video
+var blob
+// control webcam and audio
+var mediaconstraints
+// var for mode video or audio 
+var mode = 0
+// var audioURL
+var recoder
+
+
+let localstream
+let remotestream
+let sharestream
+let isroomcreator
+// Connection between the local device and the remote peer.
+let rtcpeerconnection
+let roomid
+let clientid
+
+
 // -------------------------set element event binding-------------------------------
 
 
 // click button event binding function
-connectButton.addEventListener('click', () => {
+connectbtn.addEventListener('click', () => {
   try{
     if (mode === 0){
       mode = parseInt(document.querySelector('input[name="location"]:checked').value);
     }
     if(mode === 1){
-      mediaConstraints = {audio: true,video: false}
+      mediaconstraints = {audio: true,video: false}
     }else if(mode === 2){
-      mediaConstraints = {audio: false,video: {width: { max: 1280 },height: { max: 720 }}}
+      mediaconstraints = {
+        audio: false,
+        video: {
+          width: { max: 1280 },
+          height: { max: 720 }
+        }
+      }
     }
     else if(mode === 3){
-      mediaConstraints = {audio: true,video: {width: { max: 1280 },height: { max: 720 }}}
+      mediaconstraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+      },video: {
+          width: { max: 1280 },
+          height: { max: 720 }
+        }
+      }
     }
     else{
       alert('plz check your mode')
     }
-    joinRoom(roomInput.value);
+    joinRoom(roominput.value);
   }catch (error) {
     alert('plz check your mode')
   }
@@ -70,10 +89,37 @@ connectButton.addEventListener('click', () => {
 
 
 // click button event binding function
-disConnectButton.addEventListener('click', () => {
-  leaveRoom(roomInput.value)
+disconnectbtn.addEventListener('click', () => {
+  leaveRoom(roominput.value)
 })
 
+
+// click button event binding function
+sharescreen.addEventListener('click', () => {
+  if(sharescreen.value == "0"){
+    startShareScreen(mediaconstraints)
+    sharescreen.value = "1"
+    sharescreen.innerHTML = "stop share"
+  }else if(sharescreen.value == "1"){
+    stopShareScreen(mediaconstraints)
+    sharescreen.value = "0"
+    sharescreen.innerHTML = "share screen"
+  }
+  
+})
+
+
+hidelocalbox.addEventListener('click', () => {
+  if(hidelocalbox.value == "0"){
+    localvideocomponent.srcObject = undefined;
+    hidelocalbox.value = "1"
+    hidelocalbox.innerHTML = "show localbox"
+  }else if(hidelocalbox.value == "1"){
+    localvideocomponent.srcObject = localstream;
+    hidelocalbox.value = "0"
+    hidelocalbox.innerHTML = "hide localbox"
+  }
+})
 
 // before close window or reload page warning
 window.addEventListener("beforeunload", function(event) {
@@ -83,28 +129,19 @@ window.addEventListener("beforeunload", function(event) {
 
 // close window or reload page will disconnect room
 window.addEventListener("unload", function(event) {
-  leaveRoom(roomInput.value)
-
+  leaveRoom(roominput.value)
 })
 
-
-//index.aspx?mode=1&room=500
-if(location.href.indexOf('?')!=-1){
-  var datalist = location.href.split('?')[1].split('&');
-  mode = parseInt(datalist[0].split('=')[1])
-  roomInput.value = datalist[1].split('=')[1]
-  connectButton.click()
-}
 
 // -------------------------set socket event -------------------------------
 
 // click button > socket created room event callbacks
 socket.on('room_created', async (event) => {
   console.log('Socket event callback: room_created')
-  console.log("roomURL: ",location.href.split('?')[0]+'?mode='+mode+"&room="+roomId)
+  console.log("roomURL: ",location.href.split('?')[0]+'?mode='+mode+"&room="+roomid)
   // get user local camera streams
-  await setLocalStream(mediaConstraints)
-  isRoomCreator = true
+  await setLocalStream(mediaconstraints)
+  isroomcreator = true
 })
 
 
@@ -112,9 +149,9 @@ socket.on('room_created', async (event) => {
 socket.on('room_joined', async () => {
   console.log('Socket event callback: room_joined')
   // get user local camera streams
-  await setLocalStream(mediaConstraints)
+  await setLocalStream(mediaconstraints)
   // start connect 
-  socket.emit('start_call', roomId)
+  socket.emit('start_call', roomid)
 })
 
 
@@ -129,15 +166,17 @@ socket.on('full_room', () => {
 socket.on('start_call', async () => {
   console.log('Socket event callback: start_call')
   // if roomcreator is true : means this room no person 
-  if (isRoomCreator) {
+  if (isroomcreator) {
     // creat new peerconnect ,and use ice server information(stun or turn server)
-    rtcPeerConnection = new RTCPeerConnection(iceServers)
-    addLocalTracks(rtcPeerConnection)
+    rtcpeerconnection = new RTCPeerConnection(iceservers)
+    addLocalTracks(rtcpeerconnection)
+    startRecord()
+    openBtn()
     // setting remote stream 
-    rtcPeerConnection.ontrack = setRemoteStream
+    rtcpeerconnection.ontrack = setRemoteStream
     // icecandidate(ICE) event : find shortest path
-    rtcPeerConnection.onicecandidate = sendIceCandidate
-    await createOffer(rtcPeerConnection)
+    rtcpeerconnection.onicecandidate = sendIceCandidate
+    await createOffer(rtcpeerconnection)
   }
 })
 
@@ -145,22 +184,24 @@ socket.on('start_call', async () => {
 socket.on('webrtc_offer', async (event) => {
   console.log('Socket event callback: webrtc_offer')
   // if roomcreator is false : means this room has person 
-  if (!isRoomCreator) {
+  if (!isroomcreator) {
     // creat new peerconnect ,and use ice server information(stun or turn server)
-    rtcPeerConnection = new RTCPeerConnection(iceServers)
-    addLocalTracks(rtcPeerConnection)
-    rtcPeerConnection.ontrack = setRemoteStream
-    rtcPeerConnection.onicecandidate = sendIceCandidate
+    rtcpeerconnection = new RTCPeerConnection(iceservers)
+    addLocalTracks(rtcpeerconnection)
+    startRecord()
+    openBtn()
+    rtcpeerconnection.ontrack = setRemoteStream
+    rtcpeerconnection.onicecandidate = sendIceCandidate
     // RTCSessionDescription : return our info to remote computer
-    rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event))
-    await createAnswer(rtcPeerConnection)
+    rtcpeerconnection.setRemoteDescription(new RTCSessionDescription(event))
+    await createAnswer(rtcpeerconnection)
   }
 })
 
 
 socket.on('webrtc_answer', (event) => {
   console.log('Socket event callback: webrtc_answer')
-  rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(event))
+  rtcpeerconnection.setRemoteDescription(new RTCSessionDescription(event))
 })
 
 
@@ -171,13 +212,12 @@ socket.on('webrtc_ice_candidate', (event) => {
     sdpMLineIndex: event.label,
     candidate: event.candidate,
   })
-  rtcPeerConnection.addIceCandidate(candidate)
-  disConnectButton.disabled = false;
-  disConnectButton.innerHTML = 'leave Room';
+  rtcpeerconnection.addIceCandidate(candidate)
 })
 
 
 socket.on('close_room', async () => {
+  stopRecord()
   leaveVideoConference()
   alert('your partner has left , plz enter new room creat another conversation');
   alert('WARNING!! :Plz wait for the transfer to complete before closing this page!!');
@@ -187,10 +227,11 @@ socket.on('close_room', async () => {
 socket.on('transfer_complete', async () => {
   // clearInterval(recoder)
   mode = 0
-  roomId,clientid,recoder,mediaRecorder = null,null,null,null
+  roomid,clientid,recoder,mediarecorder = undefined,undefined,undefined,undefined
   chunks = [];
   alert('transfer record complete!');
 })
+
 
 // -------------------------set logic function-------------------------------
 
@@ -199,7 +240,7 @@ function joinRoom(room) {
   if (room === '') {
     alert('Please enter a room ID')
   } else {
-    roomId = room
+    roomid = room
     clientid = UUID()
     console.log("your clientID:"+clientid)
     socket.emit('join', room)
@@ -213,9 +254,10 @@ function leaveRoom(room) {
   if (room === '') {
     alert('no room number')
   } else {
-    roomId = room
+    roomid = room
     socket.emit('leave', room)
     // socket.emit('upload_record',{'':})
+    stopRecord()
     leaveVideoConference()
     alert('video coference closed, if you need new coversation, plz enter new room number');
     alert('WARNING :plz wait for the transfer to complete before closing this page!!');
@@ -223,114 +265,151 @@ function leaveRoom(room) {
 }
 
 
-// this function to stop recorde 
-function stopRecord(){
-  mediaRecorder.stop()
-  console.log("recorder stopped");
-  var atlast = chunks.length
-  console.log("there are",atlast,"data need upload")
-  if(atlast != 0){
-    for (let i = 0; i < atlast; i++) {
-      if(i == atlast-1){
-        socket.emit('upload_blob',[chunks[i],roomId,clientid,0])
-      }else{
-        socket.emit('upload_blob',[chunks[i],roomId,clientid,1])
-      }
-    }
+// this function to start record
+function startRecord(){
+  // recoder stream
+  mediarecorder = new MediaRecorder(localstream)
+  // set stream mode (video or audio) 
+  if(mode === 1){
+    mediarecorder.mimeType = 'audio/webm; codecs=opus';
+    console.log("recorder started");
+
+  }else if(mode === 2 || mode === 3){
+    mediarecorder.mimeType = 'video/webm; codecs=h264';
+    // mediarecorder.audioChannels = 2;
+    console.log("recorder started");
   }else{
-    socket.emit('upload_blob',[[0],roomId,clientid,0])
+    console.log('can\'t recorde, plz check your mode')
+  }
+  // set 10 sec trigger dataavailable and cut blob
+  mediarecorder.start(10000);
+  // event function
+  mediarecorder.ondataavailable = function(e) {
+    chunks.push(e.data);
+    socket.emit('upload_blob',[chunks.shift(),roomid,clientid,1])
+    console.log('upload record !!')
+  }
+}
+
+
+// this function to stop record
+function stopRecord(){
+  if(mediarecorder != undefined){
+    mediarecorder.stop()
+    console.log("recorder stopped");
+    var atlast = chunks.length
+    console.log("there are",atlast,"data need upload")
+    if(atlast != 0){
+      for (let i = 0; i < atlast; i++) {
+        if(i == atlast-1){
+          socket.emit('upload_blob',[chunks[i],roomid,clientid,0])
+        }else{
+          socket.emit('upload_blob',[chunks[i],roomid,clientid,1])
+        }
+      }
+    }else{
+      socket.emit('upload_blob',[[0],roomid,clientid,0])
+    }
   }
     // blob = new Blob(chunks, { 'type' : 'audio/webm codecs=opus' });
     // var audioURL = window.URL.createObjectURL(blob);
 }
 
 
+// start sharescreen function
+async function startShareScreen(mediaconstraints){
+  var displayconstraints =  mediaconstraints
+  displayconstraints.video = {width: { max: 1920 },height: { max: 1080 }, cursor: "always"}
+  displayconstraints.audio = false
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia(displayconstraints)
+    sharestream = stream
+    localvideocomponent.srcObject = sharestream
+    senders.find(sender => sender.track.kind === 'video').replaceTrack(sharestream.getTracks()[0]);
+  } catch (error) {
+    console.error('Could not get user screem', error)
+    sharescreen.value = "0"
+    sharescreen.innerHTML = "share screen"
+  }
+}
+
+// stop sharescreen function
+async function stopShareScreen(){
+  senders.find(sender => sender.track.kind === 'video').replaceTrack(localstream.getTracks().find(track => track.kind === 'video'));
+  sharestream.getTracks()[0].stop()
+  sharestream = undefined;
+  localvideocomponent.srcObject = localstream
+}
+
+
 // this function cancle video display none if into room and get local camera stream
 function showVideoConference() {
-  roomSelectionContainer.style = 'display: none'
-  videoChatContainer.style = 'display: block'
+  roomselectioncontainer.style = 'display: none'
+  videochatcontainer.style = 'display: block'
+  disconnectbtn.disabled = false;
+  disconnectbtn.innerHTML = 'leave Room';
 }
 
 
 // leave video conference
 function leaveVideoConference() {
-  roomSelectionContainer.style = 'display: block'
-  videoChatContainer.style = 'display: none'
-  // stop localstream and close webcam(use on chrome on windows)
-  rtcPeerConnection.getSenders().forEach(function(sender) {
-    sender.track.stop();
-  });
-  // stop localstream and close webcam(used on chrome on android)
-  localStream.getTracks()[0].stop();
+  // hide video div and show choose page
+  roomselectioncontainer.style = 'display: block'
+  videochatcontainer.style = 'display: none'
 
-  // disable button
-  disConnectButton.disabled = true;
-  disConnectButton.innerHTML = 'wait for connect....';
-  stopRecord()
+  // if share screem not stop ,clear variable and stop it.
+  if(sharestream != undefined){
+    stopShareScreen()
+  }
+  // stop localstream 
+  localstream.getTracks()[0].stop();
+  // close rtc peer connection
+  if(rtcpeerconnection != undefined){
+    rtcpeerconnection.getSenders().forEach(function(sender) {
+      sender.track.stop();
+    });
+    rtcpeerconnection.close();
+  }
+  // close button
+  closeBtn()
+  // reset const
+  senders.length = 0;
   // reset variable
-  localStream = null;
-  remoteStream = null;
-  isRoomCreator = null;
-  mediaConstraints = null;
-  // close peer connection
-  rtcPeerConnection.close()
-  rtcPeerConnection = null;
+  localstream,remotestream,isroomcreator,mediaconstraints,rtcpeerconnection = undefined,undefined,undefined,undefined,undefined
 }
 
 
 // this function get user camera stream(local)
-async function setLocalStream(mediaConstraints) {
+async function setLocalStream(mediaconstraints) {
   let stream
   try {
     // if calback ,show stream and audio
-    stream = await navigator.mediaDevices.getUserMedia(mediaConstraints)
-    // stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
+    stream = await navigator.mediaDevices.getUserMedia(mediaconstraints)
 
   } catch (error) {
     console.error('Could not get user media', error)
     alert('error,check your microphone and webcame')
     leaveVideoConference()
   }
-  localStream = stream
-  localVideoComponent.srcObject = stream
+  localstream = stream
+  localvideocomponent.srcObject = stream
 }
 
 
 // add local stream to webrtc track
-function addLocalTracks(rtcPeerConnection) {
-  localStream.getTracks().forEach((track) => {
-    rtcPeerConnection.addTrack(track, localStream)
-  })
-  // recoder stream
-  mediaRecorder = new MediaRecorder(localStream)
-  // set stream mode (video or audio) 
-  if(mode === 1){
-    mediaRecorder.mimeType = 'audio/webm; codecs=opus';
-    console.log("recorder started");
-
-  }else if(mode === 2 || mode === 3){
-    mediaRecorder.mimeType = 'video/webm; codecs=h264';
-    // mediaRecorder.audioChannels = 2;
-    console.log("recorder started");
-  }else{
-    console.log('can\'t recorde, plz check your mode')
-  }
-  // set 10 sec trigger dataavailable and cut blob
-  mediaRecorder.start(10000);
-  // event function
-  mediaRecorder.ondataavailable = function(e) {
-    chunks.push(e.data);
-    socket.emit('upload_blob',[chunks.shift(),roomId,clientid,1])
-    console.log('upload record !!')
-  }
+function addLocalTracks(rtcpeerconnection) {
+  localstream.getTracks().forEach(
+    // (track) => {rtcpeerconnection.addTrack(track, localstream)},
+    track => senders.push(rtcpeerconnection.addTrack(track, localstream))
+    )
 }
 
 
-async function createOffer(rtcPeerConnection) {
+async function createOffer(rtcpeerconnection) {
   let sessionDescription
   try {
-    sessionDescription = await rtcPeerConnection.createOffer()
-    rtcPeerConnection.setLocalDescription(sessionDescription)
+    sessionDescription = await rtcpeerconnection.createOffer()
+    rtcpeerconnection.setLocalDescription(sessionDescription)
   } catch (error) {
     console.error(error)
   }
@@ -338,16 +417,16 @@ async function createOffer(rtcPeerConnection) {
   socket.emit('webrtc_offer', {
     type: 'webrtc_offer',
     sdp: sessionDescription,
-    roomId,
+    roomid,
   })
 }
 
 
-async function createAnswer(rtcPeerConnection) {
+async function createAnswer(rtcpeerconnection) {
   let sessionDescription
   try {
-    sessionDescription = await rtcPeerConnection.createAnswer()
-    rtcPeerConnection.setLocalDescription(sessionDescription)
+    sessionDescription = await rtcpeerconnection.createAnswer()
+    rtcpeerconnection.setLocalDescription(sessionDescription)
   } catch (error) {
     console.error(error)
   }
@@ -355,15 +434,15 @@ async function createAnswer(rtcPeerConnection) {
   socket.emit('webrtc_answer', {
     type: 'webrtc_answer',
     sdp: sessionDescription,
-    roomId,
+    roomid,
   })
 }
 
 
 // set remote stream 
 function setRemoteStream(event) {
-  remoteVideoComponent.srcObject = event.streams[0]
-  remoteStream = event.stream
+  remotevideocomponent.srcObject = event.streams[0]
+  remotestream = event.stream
 }
 
 
@@ -371,13 +450,33 @@ function setRemoteStream(event) {
 function sendIceCandidate(event) {
   if (event.candidate) {
     socket.emit('webrtc_ice_candidate', {
-      roomId,
+      roomid,
       label: event.candidate.sdpMLineIndex,
       candidate: event.candidate.candidate,
     })
   }
 }
 
+// open button
+function openBtn(){
+  if( mode == 2 || mode == 3){
+    sharescreen.disabled = false;
+    hidelocalbox.disabled = false
+  }else if(mode == 1){
+    sharescreen.disabled = true;
+    hidelocalbox.disabled = true
+  }
+}
+
+// close button
+function closeBtn(){
+  sharescreen.disabled = true;
+  hidelocalbox.disabled = true
+  disconnectbtn.disabled = true;
+  disconnectbtn.innerHTML = 'wait for connect....';
+  sharescreen.disabled = true;
+  hidelocalbox.disabled = true
+}
 
 // uuid function
 function UUID() {
@@ -393,3 +492,14 @@ function UUID() {
   });
 }
 
+
+
+
+// used url join room or creat room
+// http://localhost:3000/?mode=1&room=500
+if(location.href.indexOf('?')!=-1){
+  var datalist = location.href.split('?')[1].split('&');
+  mode = parseInt(datalist[0].split('=')[1])
+  roominput.value = datalist[1].split('=')[1]
+  connectbtn.click()
+}
