@@ -99,7 +99,6 @@ if __name__ == '__main__':
     for i in record_list:
         inputfilelist = os.listdir(recordpath+i)
         if len(inputfilelist)== 2 and ('merge.mp3' not in inputfilelist):
-            print("轉檔 and 合併")
             file1 = recordpath+i+'\\'+ inputfilelist[0]
             file2 = recordpath+i+'\\'+ inputfilelist[1]
             output1 = recordpath+i+'\\0.mp4'
@@ -109,22 +108,22 @@ if __name__ == '__main__':
             r2 = webm2Mp4(file2,output2)
             if r1 == True and r2 == True :
                 if mergeAudio(output1,output2,result) == True :
-                    print(i,"合併成功")
+                    print(i,"merge success")
                 else :
-                    print(i,"合併失敗")
+                    print(i,"merge failed")
 
         elif len(inputfilelist)== 4 and ('merge.mp3' not in inputfilelist):
             output1 = recordpath+i+'\\0.mp4'
             output2 = recordpath+i+'\\1.mp4'
             result = recordpath+i+'\\merge.mp3'
             if mergeAudio(output1,output2,result) == True :
-                print(i,"合併成功")
+                print(i,"merge success")
             else :
-                print(i,"合併失敗")
+                print(i,"merge failed")
         elif len(inputfilelist) < 2 and ('merge.mp3' not in inputfilelist):
-            print(i,"未完全上傳")
+            print(i,"File corruption")
         elif len(inputfilelist)== 5 and ('merge.mp3' in inputfilelist):
-            print(i,"此檔已完成")
+            print(i," has been completed")
         else:
-             print(i,"未知錯誤")
+             print(i,"unknow error")
             

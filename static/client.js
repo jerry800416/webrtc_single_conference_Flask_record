@@ -105,7 +105,6 @@ sharescreen.addEventListener('click', () => {
     sharescreen.value = "0"
     sharescreen.innerHTML = "share screen"
   }
-  
 })
 
 
@@ -225,7 +224,6 @@ socket.on('close_room', async () => {
 
 
 socket.on('transfer_complete', async () => {
-  // clearInterval(recoder)
   mode = 0
   roomid,clientid,recoder,mediarecorder = undefined,undefined,undefined,undefined
   chunks = [];
