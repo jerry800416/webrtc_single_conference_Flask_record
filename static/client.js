@@ -108,17 +108,23 @@ sharescreen.addEventListener('click', () => {
 })
 
 
+// click button event binding function
 hidelocalbox.addEventListener('click', () => {
   if(hidelocalbox.value == "0"){
     localvideocomponent.srcObject = undefined;
     hidelocalbox.value = "1"
     hidelocalbox.innerHTML = "show localbox"
   }else if(hidelocalbox.value == "1"){
-    localvideocomponent.srcObject = localstream;
+    if(sharescreen.value == "0"){
+      localvideocomponent.srcObject = localstream;
+    }else if(sharescreen.value == "1"){
+      localvideocomponent.srcObject = sharestream;
+    }
     hidelocalbox.value = "0"
     hidelocalbox.innerHTML = "hide localbox"
   }
 })
+
 
 // before close window or reload page warning
 window.addEventListener("beforeunload", function(event) {
@@ -358,6 +364,7 @@ function leaveVideoConference() {
   // if share screem not stop ,clear variable and stop it.
   if(sharestream != undefined){
     stopShareScreen()
+    console.log(123)
   }
   // stop localstream 
   localstream.getTracks()[0].stop();
@@ -373,7 +380,7 @@ function leaveVideoConference() {
   // reset const
   senders.length = 0;
   // reset variable
-  localstream,remotestream,isroomcreator,mediaconstraints,rtcpeerconnection = undefined,undefined,undefined,undefined,undefined
+  localstream,remotestream,isroomcreator,mediaconstraints,rtcpeerconnection,isroomcreator = undefined,undefined,undefined,undefined,undefined,undefined
 }
 
 
@@ -469,11 +476,13 @@ function openBtn(){
 // close button
 function closeBtn(){
   sharescreen.disabled = true;
+  sharescreen.value = "0"
+  sharescreen.innerHTML = "share screen"
   hidelocalbox.disabled = true
+  hidelocalbox.value = "0"
+  hidelocalbox.innerHTML = "hide localbox"
   disconnectbtn.disabled = true;
   disconnectbtn.innerHTML = 'wait for connect....';
-  sharescreen.disabled = true;
-  hidelocalbox.disabled = true
 }
 
 // uuid function
