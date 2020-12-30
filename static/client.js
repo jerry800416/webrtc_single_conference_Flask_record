@@ -62,7 +62,8 @@ connectbtn.addEventListener('click', () => {
         audio: false,
         video: {
           width: { max: 1280 },
-          height: { max: 720 }
+          height: { max: 720 },
+          frameRate: {max: 30}
         }
       }
     }
@@ -74,7 +75,8 @@ connectbtn.addEventListener('click', () => {
           sampleRate: 44100
       },video: {
           width: { max: 1280 },
-          height: { max: 720 }
+          height: { max: 720 },
+          frameRate: {max: 30}
         }
       }
     }
@@ -323,7 +325,7 @@ function stopRecord(){
 // start sharescreen function
 async function startShareScreen(mediaconstraints){
   var displayconstraints =  mediaconstraints
-  displayconstraints.video = {width: { max: 1920 },height: { max: 1080 }, cursor: "always"}
+  displayconstraints.video = {width: { max: 1920 },height: { max: 1080 },frameRate: {max: 30},cursor: "always"}
   displayconstraints.audio = false
   try {
     stream = await navigator.mediaDevices.getDisplayMedia(displayconstraints)

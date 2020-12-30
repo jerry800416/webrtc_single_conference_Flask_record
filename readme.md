@@ -28,9 +28,12 @@ warining : this meeting room that can only accommodate two people.<br><br>
 
 ## history
 
+#### 20201230 update
+1. 新增framerate設定為maxs30<br><br>
+
 #### 20201229 update
 1. 新增分享螢幕畫面功能<br>
-2. 新增註解以及變數名稱規範化<br><br>
+2. 新增註解以及變數名稱規範化<br>
 3. 新增縮小己方錄像功能，避免擋住畫面<br><br>
 
 #### 20201228 update
