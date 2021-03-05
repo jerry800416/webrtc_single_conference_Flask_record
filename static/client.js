@@ -13,22 +13,11 @@ const senders = []
 // free public stun servers(by google) ,but no turn server.
 const iceservers = {
   iceServers: [
-    // { urls: 'stun:stun.l.google.com:19302' },
-    // { urls: 'stun:stun1.l.google.com:19302' },
-    // { urls: 'stun:stun2.l.google.com:19302' },
-  //  { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+   { urls: 'stun:stun3.l.google.com:19302' }
     // { urls: 'stun:coturn.servepics.com:3478' },
-    { urls: 'stun:coturn.servequake.com:3478' },
-    // {
-    //   urls: 'turn:coturn.servepics.com:3478',
-    //   credential: 'ITTSturnpwd',
-    //   username: 'ITTSturnacc'
-    // },
-    {
-      urls: 'turn:coturn.servequake.com:3478',
-      credential: 'turnpwd',
-      username: 'turnadmin'
-    }
   ],
 }
 
