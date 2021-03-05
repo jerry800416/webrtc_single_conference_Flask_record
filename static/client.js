@@ -13,12 +13,22 @@ const senders = []
 // free public stun servers(by google) ,but no turn server.
 const iceservers = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
+    // { urls: 'stun:stun.l.google.com:19302' },
     // { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    // { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-    {urls: 'stun:stun.service.mozilla.com' },
+    // { urls: 'stun:stun2.l.google.com:19302' },
+  //  { urls: 'stun:stun3.l.google.com:19302' },
+    // { urls: 'stun:coturn.servepics.com:3478' },
+    { urls: 'stun:coturn.servequake.com:3478' },
+    // {
+    //   urls: 'turn:coturn.servepics.com:3478',
+    //   credential: 'ITTSturnpwd',
+    //   username: 'ITTSturnacc'
+    // },
+    {
+      urls: 'turn:coturn.servequake.com:3478',
+      credential: 'turnpwd',
+      username: 'turnadmin'
+    }
   ],
 }
 
@@ -200,6 +210,7 @@ socket.on('webrtc_offer', async (event) => {
     rtcpeerconnection.ontrack = setRemoteStream
     rtcpeerconnection.onicecandidate = sendIceCandidate
     // RTCSessionDescription : return our info to remote computer
+    console.log('setRemoteDescription')
     rtcpeerconnection.setRemoteDescription(new RTCSessionDescription(event))
     await createAnswer(rtcpeerconnection)
   }
@@ -223,7 +234,7 @@ socket.on('webrtc_ice_candidate', (event) => {
 })
 
 
-socket.on('close_room', async () => {
+socket.on('close_room', () => {
   stopRecord()
   leaveVideoConference()
   alert('your partner has left , plz enter new room creat another conversation');
@@ -231,7 +242,7 @@ socket.on('close_room', async () => {
 })
 
 
-socket.on('transfer_complete', async () => {
+socket.on('transfer_complete', () => {
   mode = 0
   roomid,clientid,recoder,mediarecorder = undefined,undefined,undefined,undefined
   chunks = [];
@@ -420,7 +431,6 @@ async function createOffer(rtcpeerconnection) {
   } catch (error) {
     console.error(error)
   }
-
   socket.emit('webrtc_offer', {
     type: 'webrtc_offer',
     sdp: sessionDescription,

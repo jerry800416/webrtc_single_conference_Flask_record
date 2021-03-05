@@ -67,6 +67,7 @@ def webrtcAnswer(event):
 @socketio.on('webrtc_ice_candidate')
 def webrtcIceCandidate(event):
     print('Broadcasting webrtc_ice_candidate event to peers in room {}'.format(event['roomid']))
+    print(event)
     emit('webrtc_ice_candidate',event,broadcast=True, include_self=False,room=event['roomid'])
 
 
@@ -78,8 +79,8 @@ def webrtcuploadblob(event):
         os.mkdir('./record/{}'.format(roomid))
 
     with open('./record/{}/{}.webm'.format(roomid,clientid),'ab') as f:
-            if event[0] != [0]:
-                f.write(event[0])
+        if event[0] != [0]:
+            f.write(event[0])
 
     if event[3] == 0:
         emit('transfer_complete')
