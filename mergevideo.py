@@ -108,8 +108,8 @@ def flipTime(file,date):
 
 if __name__ == '__main__':
 
-    recordpath = r"D:\\WebSite\\ITTS-EP-FRONTSITE\\wwwroot\\RecordUpload\\"
-    # recordpath = r"E:\\work\\webrtc\\singleWebconference1.0.0\\record\\"
+    # recordpath = r"D:\\WebSite\\ITTS-EP-FRONTSITE\\wwwroot\\RecordUpload\\"
+    recordpath = r"D:\\webrtc_single_conference_Flask_record\\record\\"
     record_list = os.listdir(recordpath)
     yesterday = str(datetime.date.today()-datetime.timedelta(days=4))
 

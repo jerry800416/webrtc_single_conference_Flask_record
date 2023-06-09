@@ -1,4 +1,5 @@
 Flask==1.1.2
+imageio==2.9.0
 eventlet==0.29.1
 Flask-SocketIO==4.3.2
 moviepy==1.0.3

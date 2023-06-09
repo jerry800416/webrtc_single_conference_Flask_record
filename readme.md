@@ -40,7 +40,8 @@ warining : this meeting room that can only accommodate two people.<br><br>
 1. 新增每10秒自動側錄回server，對話雙方各自只會側錄己方的影片和聲音，上傳server之後才會轉檔以及合成，但在server端合成時只合成聲音，影片太耗費資源<br>
 2. 新增roomid和mode顯示在網址列功能，只需要網址列打上這兩個參數就可以直接進入房間,ex: http://localhost:3000/?mode=3&room=test<br><br>
 
-
+#### 20230609 update
+1. 環境建置已符合新電腦
 
 # **Coturn server 架設(ubuntu 18.04) **
 <br>
