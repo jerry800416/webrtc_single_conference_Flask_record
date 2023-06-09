@@ -22,9 +22,10 @@ warining : this meeting room that can only accommodate two people.<br><br>
 2. unzip ffmpeg-2020-12-20-git-ab6a56773f-full_build.7z and install it on Root directory<br>
 3. cmd : python app.py<br>
 4. creat a folder in the root directory,folder name: record
-5. open browser and enter url: localhost:3000<br>
-6. if you want to merge record audio, cmd : python mergevideo.py<br>
-7. enjoy it!<br><br>
+5. add your_path/ffmpeg/bin to your envirment path
+6. open browser and enter url: localhost:3000<br>
+7. if you want to merge record audio, cmd : python mergevideo.py<br>
+8. enjoy it!<br><br>
 
 ## history
 
